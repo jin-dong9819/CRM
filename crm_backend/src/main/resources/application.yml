@@ -1,0 +1,52 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/crm?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: root
+  # Redis 已停用：短信验证码改为内存存储（com.demo.util.SmsCodeStore），恢复时取消注释
+  # data:
+  #   redis:
+  #     host: 127.0.0.1
+  #     port: 6379
+  #     database: 0
+  #     # Redis 设置了密码时再启用
+  #     # password: ${REDIS_PASSWORD}
+  #     connect-timeout: 5s
+  #     timeout: 3s
+
+mybatis:
+  # 开启驼峰命名和下划线命名的自动转换
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  # XML 映射文件位置
+  mapper-locations: classpath*:/mapper/**/*.xml
+  type-aliases-package: com.demo.entity
+
+ronglian:
+  sms:
+    account-sid: ${RONG_ACCOUNT_SID:2c94811c946f6bfb0195f54186194232}
+    auth-token: ${RONG_AUTH_TOKEN:c16c4ef7675c463f8a66cc1d4056e3b6}
+    app-id: ${RONG_APP_ID:2c94811c946f6bfb0195f54187b94239}
+    template-id: ${RONG_TEMPLATE_ID:1}
+    # 接口地址，一般不需要改；本地指向 MockWebServer 时才覆盖
+    base-url: ${RONG_BASE_URL:https://app.cloopen.com:8883}
+
+sms:
+  # 开发模式：true 时不调用短信平台，验证码由接口返回并打印到日志，方便本地联调
+  # 正式上线前必须改为 false（或通过环境变量 SMS_DEV_MODE=false 覆盖）
+  dev-mode: ${SMS_DEV_MODE:true}
+
+crm:
+  trade:
+    # 事务回滚演示开关：true 时 AccountServiceImpl#trade 在第一条 update 之后抛异常，
+    # 用来观察 @Transactional 如何把已执行的更新回滚。默认 false，线上必须保持 false。
+    demo-fail: ${TRADE_DEMO_FAIL:false}
+
+logging:
+  level:
+    com.demo: info

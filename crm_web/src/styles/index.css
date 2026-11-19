@@ -1,0 +1,120 @@
+@import './nprogress.css';
+
+:root {
+  --crm-primary: #2f6bff;
+  --crm-primary-light: #eaf0ff;
+  --crm-text: #1f2733;
+  --crm-text-secondary: #6b7785;
+  --crm-border: #e6e9ef;
+  --crm-bg: #f4f6fa;
+  --crm-sidebar-bg: #1f2733;
+  --crm-sidebar-bg-active: #2f6bff;
+  --crm-radius: 8px;
+
+  /* 覆盖 Element Plus 主色 */
+  --el-color-primary: #2f6bff;
+  --el-color-primary-light-3: #6b93ff;
+  --el-color-primary-light-5: #97b3ff;
+  --el-color-primary-light-7: #c3d2ff;
+  --el-color-primary-light-8: #d9e2ff;
+  --el-color-primary-light-9: #eaf0ff;
+  --el-color-primary-dark-2: #2557d6;
+  --el-border-radius-base: 6px;
+  --el-font-family: 'PingFang SC', 'Microsoft YaHei', 'Helvetica Neue', Arial, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--el-font-family);
+  color: var(--crm-text);
+  background: var(--crm-bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* ---------- 通用页面容器 ---------- */
+.page-container {
+  padding: 16px;
+}
+
+.page-card {
+  background: #fff;
+  border-radius: var(--crm-radius);
+  padding: 16px 16px 8px;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+}
+
+.page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.page-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.page-title small {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--crm-text-secondary);
+}
+
+/* 搜索区 */
+.search-form {
+  padding-bottom: 4px;
+}
+
+.search-form .el-form-item {
+  margin-bottom: 12px;
+}
+
+/* 表格上方的操作按钮区 */
+.table-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.table-toolbar .left {
+  display: flex;
+  gap: 8px;
+}
+
+.pagination-wrap {
+  display: flex;
+  justify-content: flex-end;
+  padding: 14px 0 8px;
+}
+
+/* 表格内的金额 / 编号字体 */
+.mono {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', monospace;
+  font-size: 13px;
+}
+
+.amount {
+  font-weight: 600;
+  color: #e6581c;
+}

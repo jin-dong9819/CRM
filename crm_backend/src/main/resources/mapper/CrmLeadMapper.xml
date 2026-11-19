@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.demo.mapper.CrmLeadMapper">
+
+    <sql id="pageWhere">
+        where del_flag = 0
+        <if test="keyword != null and keyword != ''">
+            and (lead_no like concat('%', #{keyword}, '%')
+            or name like concat('%', #{keyword}, '%')
+            or company like concat('%', #{keyword}, '%')
+            or contact like concat('%', #{keyword}, '%')
+            or phone like concat('%', #{keyword}, '%'))
+        </if>
+        <if test="status != null and status != ''">
+            and status = #{status}
+        </if>
+        <if test="source != null and source != ''">
+            and source = #{source}
+        </if>
+        <if test="level != null and level != ''">
+            and level = #{level}
+        </if>
+    </sql>
+
+    <select id="selectPage" resultType="com.demo.entity.CrmLead">
+        select *
+        from crm_lead
+        <include refid="pageWhere"/>
+        order by id desc
+        limit #{offset}, #{limit}
+    </select>
+
+    <select id="countPage" resultType="long">
+        select count(*)
+        from crm_lead
+        <include refid="pageWhere"/>
+    </select>
+
+    <select id="selectById" resultType="com.demo.entity.CrmLead">
+        select *
+        from crm_lead
+        where id = #{id}
+          and del_flag = 0
+    </select>
+
+    <select id="selectByNo" resultType="com.demo.entity.CrmLead">
+        select *
+        from crm_lead
+        where lead_no = #{leadNo}
+          and del_flag = 0
+    </select>
+
+    <select id="selectMaxSeq" resultType="java.lang.Integer">
+        select max(cast(substring(lead_no, char_length(#{prefix}) + 1) as unsigned))
+        from crm_lead
+        where lead_no like concat(#{prefix}, '%')
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        insert into crm_lead (lead_no, name, company, contact, phone, source, level,
+                              owner, status, next_follow_time, remark, create_by, update_by)
+        values (#{leadNo}, #{name}, #{company}, #{contact}, #{phone}, #{source}, #{level},
+                #{owner}, #{status}, #{nextFollowTime}, #{remark}, #{createBy}, #{updateBy})
+    </insert>
+
+    <update id="update">
+        update crm_lead
+        set name             = #{name},
+            company          = #{company},
+            contact          = #{contact},
+            phone            = #{phone},
+            source           = #{source},
+            level            = #{level},
+            owner            = #{owner},
+            status           = #{status},
+            next_follow_time = #{nextFollowTime},
+            remark           = #{remark},
+            update_by        = #{updateBy}
+        where id = #{id}
+          and del_flag = 0
+    </update>
+
+    <update id="logicDelete">
+        update crm_lead
+        set del_flag  = 1,
+            update_by = #{updateBy}
+        where id = #{id}
+          and del_flag = 0
+    </update>
+
+</mapper>

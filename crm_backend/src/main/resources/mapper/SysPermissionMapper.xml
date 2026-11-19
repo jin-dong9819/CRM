@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.demo.mapper.SysPermissionMapper">
+
+    <select id="selectAllEnabled" resultType="com.demo.entity.SysPermission">
+        select *
+        from sys_permission
+        where status = 1
+        order by parent_id, sort, id
+    </select>
+
+    <select id="selectAll" resultType="com.demo.entity.SysPermission">
+        select *
+        from sys_permission
+        order by parent_id, sort, id
+    </select>
+
+    <select id="selectById" resultType="com.demo.entity.SysPermission">
+        select *
+        from sys_permission
+        where id = #{id}
+    </select>
+
+    <select id="countByCode" resultType="int">
+        select count(*)
+        from sys_permission
+        where perm_code = #{permCode}
+        <if test="excludeId != null">
+            and id != #{excludeId}
+        </if>
+    </select>
+
+    <select id="countChildren" resultType="int">
+        select count(*)
+        from sys_permission
+        where parent_id = #{parentId}
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        insert into sys_permission (parent_id, perm_name, perm_code, perm_type, path, component, icon,
+                                    sort, visible, status)
+        values (#{parentId}, #{permName}, #{permCode}, #{permType}, #{path}, #{component}, #{icon},
+                #{sort}, #{visible}, #{status})
+    </insert>
+
+    <update id="update">
+        update sys_permission
+        set parent_id   = #{parentId},
+            perm_name   = #{permName},
+            perm_code   = #{permCode},
+            perm_type   = #{permType},
+            path        = #{path},
+            component   = #{component},
+            icon        = #{icon},
+            sort        = #{sort},
+            visible     = #{visible},
+            status      = #{status},
+            update_time = now()
+        where id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        delete
+        from sys_permission
+        where id = #{id}
+    </delete>
+
+    <delete id="deleteRolePermissions">
+        delete
+        from sys_role_permission
+        where permission_id = #{permissionId}
+    </delete>
+
+</mapper>

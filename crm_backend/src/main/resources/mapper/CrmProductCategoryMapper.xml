@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.demo.mapper.CrmProductCategoryMapper">
+
+    <select id="selectAll" resultType="com.demo.entity.CrmProductCategory">
+        select *
+        from crm_product_category
+        <where>
+            <if test="status != null">
+                and status = #{status}
+            </if>
+        </where>
+        order by parent_id, sort, id
+    </select>
+
+    <select id="selectById" resultType="com.demo.entity.CrmProductCategory">
+        select *
+        from crm_product_category
+        where id = #{id}
+    </select>
+
+    <select id="countChildren" resultType="int">
+        select count(*)
+        from crm_product_category
+        where parent_id = #{parentId}
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        insert into crm_product_category (parent_id, category_name, sort, status)
+        values (#{parentId}, #{categoryName}, #{sort}, #{status})
+    </insert>
+
+    <update id="update">
+        update crm_product_category
+        set parent_id     = #{parentId},
+            category_name = #{categoryName},
+            sort          = #{sort},
+            status        = #{status}
+        where id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        delete from crm_product_category where id = #{id}
+    </delete>
+
+</mapper>

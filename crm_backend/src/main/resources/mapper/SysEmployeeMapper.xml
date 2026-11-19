@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.demo.mapper.SysEmployeeMapper">
+
+    <sql id="pageWhere">
+        where e.del_flag = 0
+        <if test="keyword != null and keyword != ''">
+            and (e.emp_no like concat('%', #{keyword}, '%')
+            or e.name like concat('%', #{keyword}, '%')
+            or e.phone like concat('%', #{keyword}, '%')
+            or e.email like concat('%', #{keyword}, '%'))
+        </if>
+        <!-- 选上级部门时，其所有下级的员工也要查出来 -->
+        <if test="deptId != null">
+            and (e.dept_id = #{deptId} or find_in_set(cast(#{deptId} as char), d.ancestors))
+        </if>
+        <if test="status != null">
+            and e.status = #{status}
+        </if>
+    </sql>
+
+    <select id="selectPage" resultType="com.demo.vo.EmployeeVO">
+        select e.id, e.emp_no, e.name, e.gender, e.phone, e.email, e.avatar,
+               e.dept_id, d.dept_name, e.job_title, e.hire_date, e.status, e.remark,
+               e.create_time, e.update_time, e.last_login_time, e.last_login_ip, e.pwd_update_time
+        from sys_employee e
+        left join sys_dept d on d.id = e.dept_id
+        <include refid="pageWhere"/>
+        order by e.id
+        limit #{offset}, #{limit}
+    </select>
+
+    <select id="countPage" resultType="long">
+        select count(*)
+        from sys_employee e
+        left join sys_dept d on d.id = e.dept_id
+        <include refid="pageWhere"/>
+    </select>
+
+    <select id="selectById" resultType="com.demo.entity.SysEmployee">
+        select *
+        from sys_employee
+        where id = #{id}
+          and del_flag = 0
+    </select>
+
+    <select id="selectByEmpNo" resultType="com.demo.entity.SysEmployee">
+        select *
+        from sys_employee
+        where emp_no = #{empNo}
+          and del_flag = 0
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        insert into sys_employee (emp_no, password, name, gender, phone, email, avatar,
+                                  dept_id, job_title, hire_date, status, remark,
+                                  create_by, update_by, pwd_update_time)
+        values (#{empNo}, #{password}, #{name}, #{gender}, #{phone}, #{email}, #{avatar},
+                #{deptId}, #{jobTitle}, #{hireDate}, #{status}, #{remark},
+                #{createBy}, #{updateBy}, now())
+    </insert>
+
+    <update id="update">
+        update sys_employee
+        <set>
+            emp_no = #{empNo},
+            name = #{name},
+            <if test="gender != null">gender = #{gender},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="email != null">email = #{email},</if>
+            <if test="avatar != null">avatar = #{avatar},</if>
+            <if test="deptId != null">dept_id = #{deptId},</if>
+            <if test="jobTitle != null">job_title = #{jobTitle},</if>
+            <if test="hireDate != null">hire_date = #{hireDate},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            update_time = now()
+        </set>
+        where id = #{id}
+    </update>
+
+    <update id="logicDelete">
+        update sys_employee
+        set del_flag = 1,
+            update_by = #{updateBy},
+            update_time = now()
+        where id = #{id}
+    </update>
+
+    <update id="updateStatus">
+        update sys_employee
+        set status = #{status},
+            update_by = #{updateBy},
+            update_time = now()
+        where id = #{id}
+    </update>
+
+    <update id="updateLoginInfo">
+        update sys_employee
+        set last_login_time = #{lastLoginTime},
+            last_login_ip   = #{lastLoginIp}
+        where id = #{id}
+    </update>
+
+    <update id="updatePassword">
+        update sys_employee
+        set password = #{password},
+            pwd_update_time = #{pwdUpdateTime},
+            update_time = now()
+        where id = #{id}
+    </update>
+
+    <select id="selectRolesByEmpIds" resultType="com.demo.vo.EmployeeRoleVO">
+        select er.employee_id, r.id as role_id, r.role_name, r.role_code
+        from sys_employee_role er
+        join sys_role r on r.id = er.role_id and r.del_flag = 0
+        where er.employee_id in
+        <foreach collection="empIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        order by r.id
+    </select>
+
+    <delete id="deleteEmployeeRoles">
+        delete
+        from sys_employee_role
+        where employee_id = #{employeeId}
+    </delete>
+
+    <insert id="insertEmployeeRoles">
+        insert into sys_employee_role (employee_id, role_id) values
+        <foreach collection="roleIds" item="roleId" separator=",">
+            (#{employeeId}, #{roleId})
+        </foreach>
+    </insert>
+
+    <select id="selectPermCodesByEmpId" resultType="java.lang.String">
+        select distinct p.perm_code
+        from sys_employee_role er
+                 join sys_role_permission rp on rp.role_id = er.role_id
+                 join sys_permission p on p.id = rp.permission_id and p.status = 1
+        where er.employee_id = #{employeeId}
+    </select>
+
+</mapper>

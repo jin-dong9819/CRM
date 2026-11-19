@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.demo.mapper.CrmProductMapper">
+
+    <sql id="pageWhere">
+        <where>
+            <if test="keyword != null and keyword != ''">
+                and (p.product_code like concat('%', #{keyword}, '%')
+                or p.product_name like concat('%', #{keyword}, '%')
+                or p.brand like concat('%', #{keyword}, '%')
+                or p.model like concat('%', #{keyword}, '%')
+                or p.fitment like concat('%', #{keyword}, '%'))
+            </if>
+            <if test="categoryId != null">
+                <!-- 选一级分类时，连同其下二级分组一起匹配 -->
+                and (p.category_id = #{categoryId}
+                or p.category_id in (select id from crm_product_category where parent_id = #{categoryId}))
+            </if>
+            <if test="brand != null and brand != ''">
+                and p.brand = #{brand}
+            </if>
+            <if test="status != null">
+                and p.status = #{status}
+            </if>
+        </where>
+    </sql>
+
+    <select id="selectPage" resultType="com.demo.entity.CrmProduct">
+        select p.*, c.category_name
+        from crm_product p
+        left join crm_product_category c on c.id = p.category_id
+        <include refid="pageWhere"/>
+        order by p.id desc
+        limit #{offset}, #{limit}
+    </select>
+
+    <select id="countPage" resultType="long">
+        select count(*)
+        from crm_product p
+        <include refid="pageWhere"/>
+    </select>
+
+    <select id="selectById" resultType="com.demo.entity.CrmProduct">
+        select p.*, c.category_name
+        from crm_product p
+        left join crm_product_category c on c.id = p.category_id
+        where p.id = #{id}
+    </select>
+
+    <select id="selectByCode" resultType="com.demo.entity.CrmProduct">
+        select p.*, c.category_name
+        from crm_product p
+        left join crm_product_category c on c.id = p.category_id
+        where p.product_code = #{productCode}
+    </select>
+
+    <select id="selectMaxSeq" resultType="java.lang.Integer">
+        select max(cast(substring(product_code, char_length(#{prefix}) + 1) as unsigned))
+        from crm_product
+        where product_code like concat(#{prefix}, '%')
+    </select>
+
+    <select id="countByCategory" resultType="int">
+        select count(*)
+        from crm_product
+        where category_id = #{categoryId}
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        insert into crm_product (product_code, product_name, category_id, brand, model, spec,
+                                 fitment, unit, price, cost_price, status, remark)
+        values (#{productCode}, #{productName}, #{categoryId}, #{brand}, #{model}, #{spec},
+                #{fitment}, #{unit}, #{price}, #{costPrice}, #{status}, #{remark})
+    </insert>
+
+    <update id="update">
+        update crm_product
+        set product_name = #{productName},
+            category_id  = #{categoryId},
+            brand        = #{brand},
+            model        = #{model},
+            spec         = #{spec},
+            fitment      = #{fitment},
+            unit         = #{unit},
+            price        = #{price},
+            cost_price   = #{costPrice},
+            status       = #{status},
+            remark       = #{remark}
+        where id = #{id}
+    </update>
+
+    <delete id="deleteById">
+        delete from crm_product where id = #{id}
+    </delete>
+
+</mapper>

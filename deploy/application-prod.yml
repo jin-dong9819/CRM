@@ -1,0 +1,16 @@
+server:
+  port: 8000
+  address: 127.0.0.1
+
+spring:
+  datasource:
+    url: jdbc:mysql://127.0.0.1:3306/crm?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+    username: crm_app
+    password: "Jin15518837338"
+
+mybatis:
+  configuration:
+    log-impl: org.apache.ibatis.logging.nologging.NoLoggingImpl
+
+sms:
+  dev-mode: false

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.demo.mapper.CrmOrderMapper">
+
+    <sql id="pageWhere">
+        where del_flag = 0
+        <if test="keyword != null and keyword != ''">
+            and (order_no like concat('%', #{keyword}, '%')
+            or customer_name like concat('%', #{keyword}, '%')
+            or product_name like concat('%', #{keyword}, '%')
+            or owner like concat('%', #{keyword}, '%'))
+        </if>
+        <if test="status != null and status != ''">
+            and status = #{status}
+        </if>
+        <if test="payStatus != null and payStatus != ''">
+            and pay_status = #{payStatus}
+        </if>
+        <if test="customerId != null">
+            and customer_id = #{customerId}
+        </if>
+    </sql>
+
+    <select id="selectPage" resultType="com.demo.entity.CrmOrder">
+        select *
+        from crm_order
+        <include refid="pageWhere"/>
+        order by id desc
+        limit #{offset}, #{limit}
+    </select>
+
+    <select id="countPage" resultType="long">
+        select count(*)
+        from crm_order
+        <include refid="pageWhere"/>
+    </select>
+
+    <select id="selectById" resultType="com.demo.entity.CrmOrder">
+        select *
+        from crm_order
+        where id = #{id}
+          and del_flag = 0
+    </select>
+
+    <select id="selectByNo" resultType="com.demo.entity.CrmOrder">
+        select *
+        from crm_order
+        where order_no = #{orderNo}
+          and del_flag = 0
+    </select>
+
+    <select id="selectMaxSeq" resultType="java.lang.Integer">
+        select max(cast(substring(order_no, char_length(#{prefix}) + 1) as unsigned))
+        from crm_order
+        where order_no like concat(#{prefix}, '%')
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        insert into crm_order (order_no, customer_id, customer_name, product_name, amount,
+                               pay_status, status, order_date, owner, remark, create_by, update_by)
+        values (#{orderNo}, #{customerId}, #{customerName}, #{productName}, #{amount},
+                #{payStatus}, #{status}, #{orderDate}, #{owner}, #{remark}, #{createBy}, #{updateBy})
+    </insert>
+
+    <update id="update">
+        update crm_order
+        set customer_id   = #{customerId},
+            customer_name = #{customerName},
+            product_name  = #{productName},
+            amount        = #{amount},
+            pay_status    = #{payStatus},
+            status        = #{status},
+            order_date    = #{orderDate},
+            owner         = #{owner},
+            remark        = #{remark},
+            update_by     = #{updateBy}
+        where id = #{id}
+          and del_flag = 0
+    </update>
+
+    <update id="logicDelete">
+        update crm_order
+        set del_flag  = 1,
+            update_by = #{updateBy}
+        where id = #{id}
+          and del_flag = 0
+    </update>
+
+</mapper>

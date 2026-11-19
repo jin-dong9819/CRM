@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.demo.mapper.CrmCustomerMapper">
+
+    <sql id="pageWhere">
+        where del_flag = 0
+        <if test="keyword != null and keyword != ''">
+            and (cust_no like concat('%', #{keyword}, '%')
+            or name like concat('%', #{keyword}, '%')
+            or contact like concat('%', #{keyword}, '%')
+            or phone like concat('%', #{keyword}, '%')
+            or industry like concat('%', #{keyword}, '%'))
+        </if>
+        <if test="level != null and level != ''">
+            and level = #{level}
+        </if>
+        <if test="status != null and status != ''">
+            and status = #{status}
+        </if>
+        <if test="industry != null and industry != ''">
+            and industry = #{industry}
+        </if>
+    </sql>
+
+    <select id="selectPage" resultType="com.demo.entity.CrmCustomer">
+        select *
+        from crm_customer
+        <include refid="pageWhere"/>
+        order by id desc
+        limit #{offset}, #{limit}
+    </select>
+
+    <select id="countPage" resultType="long">
+        select count(*)
+        from crm_customer
+        <include refid="pageWhere"/>
+    </select>
+
+    <select id="selectById" resultType="com.demo.entity.CrmCustomer">
+        select *
+        from crm_customer
+        where id = #{id}
+          and del_flag = 0
+    </select>
+
+    <select id="selectByNo" resultType="com.demo.entity.CrmCustomer">
+        select *
+        from crm_customer
+        where cust_no = #{custNo}
+          and del_flag = 0
+    </select>
+
+    <select id="selectMaxSeq" resultType="java.lang.Integer">
+        select max(cast(substring(cust_no, char_length(#{prefix}) + 1) as unsigned))
+        from crm_customer
+        where cust_no like concat(#{prefix}, '%')
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        insert into crm_customer (cust_no, name, industry, level, contact, phone, address,
+                                  owner, status, remark, create_by, update_by)
+        values (#{custNo}, #{name}, #{industry}, #{level}, #{contact}, #{phone}, #{address},
+                #{owner}, #{status}, #{remark}, #{createBy}, #{updateBy})
+    </insert>
+
+    <update id="update">
+        update crm_customer
+        set name      = #{name},
+            industry  = #{industry},
+            level     = #{level},
+            contact   = #{contact},
+            phone     = #{phone},
+            address   = #{address},
+            owner     = #{owner},
+            status    = #{status},
+            remark    = #{remark},
+            update_by = #{updateBy}
+        where id = #{id}
+          and del_flag = 0
+    </update>
+
+    <update id="logicDelete">
+        update crm_customer
+        set del_flag  = 1,
+            update_by = #{updateBy}
+        where id = #{id}
+          and del_flag = 0
+    </update>
+
+</mapper>

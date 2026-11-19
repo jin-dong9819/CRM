@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.demo.mapper.CrmOpportunityMapper">
+
+    <sql id="pageWhere">
+        where del_flag = 0
+        <if test="keyword != null and keyword != ''">
+            and (opp_no like concat('%', #{keyword}, '%')
+            or name like concat('%', #{keyword}, '%')
+            or customer_name like concat('%', #{keyword}, '%')
+            or owner like concat('%', #{keyword}, '%'))
+        </if>
+        <if test="stage != null and stage != ''">
+            and stage = #{stage}
+        </if>
+        <if test="customerId != null">
+            and customer_id = #{customerId}
+        </if>
+    </sql>
+
+    <select id="selectPage" resultType="com.demo.entity.CrmOpportunity">
+        select *
+        from crm_opportunity
+        <include refid="pageWhere"/>
+        order by id desc
+        limit #{offset}, #{limit}
+    </select>
+
+    <select id="countPage" resultType="long">
+        select count(*)
+        from crm_opportunity
+        <include refid="pageWhere"/>
+    </select>
+
+    <select id="selectById" resultType="com.demo.entity.CrmOpportunity">
+        select *
+        from crm_opportunity
+        where id = #{id}
+          and del_flag = 0
+    </select>
+
+    <select id="selectByNo" resultType="com.demo.entity.CrmOpportunity">
+        select *
+        from crm_opportunity
+        where opp_no = #{oppNo}
+          and del_flag = 0
+    </select>
+
+    <select id="selectMaxSeq" resultType="java.lang.Integer">
+        select max(cast(substring(opp_no, char_length(#{prefix}) + 1) as unsigned))
+        from crm_opportunity
+        where opp_no like concat(#{prefix}, '%')
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="id">
+        insert into crm_opportunity (opp_no, name, customer_id, customer_name, amount, stage,
+                                     probability, expect_date, owner, remark, create_by, update_by)
+        values (#{oppNo}, #{name}, #{customerId}, #{customerName}, #{amount}, #{stage},
+                #{probability}, #{expectDate}, #{owner}, #{remark}, #{createBy}, #{updateBy})
+    </insert>
+
+    <update id="update">
+        update crm_opportunity
+        set name          = #{name},
+            customer_id   = #{customerId},
+            customer_name = #{customerName},
+            amount        = #{amount},
+            stage         = #{stage},
+            probability   = #{probability},
+            expect_date   = #{expectDate},
+            owner         = #{owner},
+            remark        = #{remark},
+            update_by     = #{updateBy}
+        where id = #{id}
+          and del_flag = 0
+    </update>
+
+    <update id="logicDelete">
+        update crm_opportunity
+        set del_flag  = 1,
+            update_by = #{updateBy}
+        where id = #{id}
+          and del_flag = 0
+    </update>
+
+</mapper>

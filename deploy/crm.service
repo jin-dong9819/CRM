@@ -1,0 +1,43 @@
+[Unit]
+Description=YiPeiTong CRM Backend (Spring Boot)
+Documentation=file:///opt/crm/DEPLOY.md
+After=network-online.target mysql.service
+Wants=network-online.target
+Requires=mysql.service
+
+[Service]
+Type=simple
+User=crm
+Group=crm
+WorkingDirectory=/opt/crm/app
+
+Environment="JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64"
+Environment="LANG=C.UTF-8"
+# 数据库密码等敏感变量放这里，权限 600，不要提交到仓库
+EnvironmentFile=-/opt/crm/app/crm.env
+
+ExecStart=/usr/lib/jvm/java-17-openjdk-amd64/bin/java \
+    -server \
+    -Xms512m -Xmx1024m \
+    -XX:+UseG1GC \
+    -XX:+HeapDumpOnOutOfMemoryError \
+    -XX:HeapDumpPath=/opt/crm/logs \
+    -Duser.timezone=Asia/Shanghai \
+    -Dfile.encoding=UTF-8 \
+    -jar /opt/crm/app/crm.jar \
+    --spring.profiles.active=prod \
+    --spring.config.additional-location=file:/etc/crm/
+
+# Spring Boot 收到 SIGTERM 正常停机退出码
+SuccessExitStatus=143
+Restart=always
+RestartSec=5
+
+StandardOutput=append:/opt/crm/logs/stdout.log
+StandardError=append:/opt/crm/logs/stderr.log
+
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

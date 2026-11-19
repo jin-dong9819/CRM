@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--
+  namespace: 应该和之前写的那个接口的路径保持一致
+-->
+<mapper namespace="com.demo.mapper.EmployeeMapper">
+
+    <!--
+       id应该和EmployeeMapper接口中的方法名保持一致
+       resultType应该和方法的返回值类型有关，一般是表对应的实体类
+    -->
+    <select id="selectByCondition" resultType="Employee">
+        SELECT * FROM employee
+        <where>
+            <if test="name != null and name != '' ">
+                AND name like concat('%',#{name},'%')
+            </if>
+            <if test="gender != null and gender != ''">
+                AND gender = #{gender}
+            </if>
+        </where>
+
+    </select>
+
+</mapper>
